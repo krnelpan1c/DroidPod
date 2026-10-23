@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- No INTERNET permission: DroidPod only talks to other apps on the device. -->
+
+    <!-- Strong wheel haptics drive the vibrator directly. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Package visibility (Android 11+): lets us show player names, launch players
+         and send them media buttons. Nearly every music app matches one of these. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MEDIA_BUTTON" />
+        </intent>
+        <intent>
+            <action android:name="android.media.browse.MediaBrowserService" />
+        </intent>
+        <!-- Supported players (SupportedPlayers.PACKAGES). -->
+        <package android:name="com.spotify.music" />
+        <package android:name="com.apple.android.music" />
+        <package android:name="com.google.android.apps.youtube.music" />
+        <package android:name="com.amazon.mp3" />
+        <package android:name="com.aspiro.tidal" />
+        <package android:name="com.qobuz.music" />
+        <!-- Launcher apps: the Add Player picker. -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".DroidPodApp"
+        android:allowBackup="true"
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="33"
+        android:icon="@mipmap/ic_launcher"
+        android:label="${appLabel}"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.DroidPod">
+
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|density|uiMode"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Only exists so the system lets us read active media sessions. It never
+             looks at notification contents. -->
+        <service
+            android:name=".media.MediaListenerService"
+            android:exported="false"
+            android:label="${appLabel}"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

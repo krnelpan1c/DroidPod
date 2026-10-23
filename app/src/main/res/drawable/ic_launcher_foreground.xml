@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A generic music player with a screen and a wheel. Original artwork. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Body -->
+    <path
+        android:fillColor="#FFF2F2F4"
+        android:pathData="M42,25 h24 a6,6 0 0,1 6,6 v46 a6,6 0 0,1 -6,6 h-24 a6,6 0 0,1 -6,-6 v-46 a6,6 0 0,1 6,-6 z" />
+    <!-- Screen -->
+    <path
+        android:fillColor="#FF3B8AE6"
+        android:pathData="M42,30 h24 a2,2 0 0,1 2,2 v16 a2,2 0 0,1 -2,2 h-24 a2,2 0 0,1 -2,-2 v-16 a2,2 0 0,1 2,-2 z" />
+    <!-- Wheel -->
+    <path
+        android:fillColor="#FFC9CCD2"
+        android:pathData="M43,66 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0 z" />
+    <!-- Center button -->
+    <path
+        android:fillColor="#FFF2F2F4"
+        android:pathData="M50,66 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z" />
+</vector>

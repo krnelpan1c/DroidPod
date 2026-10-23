@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="window_background">#FF1C1C1E</color>
+    <color name="icon_background">#FF1F2A44</color>
+
+    <style name="Theme.DroidPod" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+</resources>

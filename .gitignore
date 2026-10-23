@@ -1,0 +1,18 @@
+plan.md
+
+# Gradle / Android
+.gradle/
+.kotlin/
+build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# IDE
+.idea/
+*.iml
+
+# Signing keys never belong in the repo
+*.jks
+*.keystore
