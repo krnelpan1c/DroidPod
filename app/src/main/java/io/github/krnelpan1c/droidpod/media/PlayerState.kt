@@ -16,7 +16,10 @@ data class CustomActionInfo(val action: String, val name: String) {
     val isRepeat: Boolean get() = action.lowercase().let { "repeat" in it || "loop" in it }
 }
 
-data class QueueEntry(val id: Long, val title: String)
+data class QueueEntry(val id: Long, val title: String, val subtitle: String = "") {
+    /** Identifies the track for [QueueCounter]. Ids aren't used when there's a title: some apps renumber them. */
+    val trackKey: String get() = if (title.isNotBlank()) "$title\n$subtitle" else "#$id"
+}
 
 /** Everything the UI needs about the session being controlled. */
 data class NowPlaying(
@@ -40,6 +43,8 @@ data class NowPlaying(
     val repeat: RepeatSetting?,
     val queue: List<QueueEntry>,
     val activeQueueId: Long,
+    /** Position in the whole album or playlist, which may be longer than [queue]. */
+    val queuePosition: QueuePosition?,
 ) {
     val isPlaying: Boolean get() = status == PlayStatus.Playing || status == PlayStatus.Buffering
 

@@ -180,6 +180,15 @@ class SessionRepository(
             }
         } else null
 
+        val queue = c.queue.orEmpty().map { item ->
+            QueueEntry(
+                item.queueId,
+                item.description.title?.toString().orEmpty(),
+                item.description.subtitle?.toString().orEmpty(),
+            )
+        }
+        val activeQueueId = s?.activeQueueItemId ?: MediaSessionCompat.QueueItem.UNKNOWN_ID.toLong()
+
         return NowPlaying(
             key = session.key,
             packageName = session.packageName,
@@ -204,16 +213,16 @@ class SessionRepository(
             customActions = s?.customActions.orEmpty().map { CustomActionInfo(it.action, it.name.toString()) },
             shuffle = shuffle,
             repeat = repeat,
-            queue = c.queue.orEmpty().map { item ->
-                QueueEntry(item.queueId, item.description.title?.toString().orEmpty())
-            },
-            activeQueueId = s?.activeQueueItemId ?: MediaSessionCompat.QueueItem.UNKNOWN_ID.toLong(),
+            queue = queue,
+            activeQueueId = activeQueueId,
+            queuePosition = session.counter.update(queue.map { it.trackKey }, queue.indexOfFirst { it.id == activeQueueId }),
         )
     }
 
     private inner class TrackedSession(val key: String, val controller: MediaControllerCompat) {
         val packageName: String = controller.packageName
         var lastPlayingAt = 0L
+        val counter = QueueCounter()
         val isPlaying: Boolean get() = controller.playbackState.isActive()
         private var wasPlaying = isPlaying
 

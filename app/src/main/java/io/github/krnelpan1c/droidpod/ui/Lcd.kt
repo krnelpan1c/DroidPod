@@ -174,12 +174,21 @@ private fun StatusBar(title: String, playGlyph: Boolean?) {
         Canvas(Modifier.fillMaxSize()) {
             val line = metrics.pixel.toPx()
             drawRect(style.divider, Offset(0f, size.height - line), Size(size.width, line))
-            val glyph = size.height * 0.45f
-            val at = Offset(size.height * 0.6f, size.height / 2)
-            when (playGlyph) {
-                true -> drawPlayGlyph(at, glyph, style.text)
-                false -> drawPauseGlyph(at, glyph * 0.9f, style.text)
-                null -> Unit
+        }
+        if (playGlyph != null) {
+            // Its own canvas, so the progress bar's gradient spans the glyph rather than the bar.
+            val glyph = metrics.statusHeight * 0.45f
+            Canvas(
+                Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = metrics.statusHeight * 0.6f - glyph / 2)
+                    .size(glyph),
+            ) {
+                if (playGlyph) {
+                    drawPlayGlyph(center, size.minDimension, style.fill)
+                } else {
+                    drawPauseGlyph(center, size.minDimension * 0.9f, style.fill)
+                }
             }
         }
         BasicText(

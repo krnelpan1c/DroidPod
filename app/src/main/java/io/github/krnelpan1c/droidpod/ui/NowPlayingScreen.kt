@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -112,42 +111,46 @@ fun NowPlayingScreen(
 
 @Composable
 private fun QueuePosition(np: NowPlaying) {
-    val index = np.queueIndex
-    if (index < 0) return
+    val position = np.queuePosition ?: return
     val metrics = LocalLcdMetrics.current
     BasicText(
-        "${index + 1} of ${np.queue.size}",
+        "${position.number} of ${position.total}",
         style = lcdText(metrics.smallFont, LocalLcdStyle.current.secondaryText, FontWeight.Normal),
     )
 }
 
 @Composable
 private fun TrackInfo(np: NowPlaying) {
+    val style = LocalLcdStyle.current
     val metrics = LocalLcdMetrics.current
+    // Without artwork the text gets the whole screen, so it's menu-sized and scrolls instead of truncating.
+    val large = !style.showArt
     BasicText(
         np.title.ifBlank { "Unknown" },
         style = lcdText(),
         maxLines = 1,
         modifier = Modifier.basicMarquee(initialDelayMillis = 1_500),
     )
-    np.artist?.let { InfoLine(it) }
-    np.album?.let { InfoLine(it) }
+    np.artist?.let { InfoLine(it, large) }
+    np.album?.let { InfoLine(it, large) }
     BasicText(
         np.appLabel,
-        style = lcdText(metrics.smallFont * 0.85f, LocalLcdStyle.current.secondaryText, FontWeight.Normal),
+        // The pixel font stays on its grid; Classic's label is a touch smaller than the info lines.
+        style = lcdText(if (style.retro) metrics.smallFont else metrics.smallFont * 0.85f, style.secondaryText, FontWeight.Normal),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )
 }
 
 @Composable
-private fun InfoLine(text: String) {
+private fun InfoLine(text: String, large: Boolean) {
     val metrics = LocalLcdMetrics.current
     BasicText(
         text,
-        style = lcdText(metrics.smallFont, LocalLcdStyle.current.text, FontWeight.Normal),
+        style = lcdText(if (large) metrics.font else metrics.smallFont, LocalLcdStyle.current.text, FontWeight.Normal),
         maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
+        overflow = if (large) TextOverflow.Clip else TextOverflow.Ellipsis,
+        modifier = if (large) Modifier.basicMarquee(initialDelayMillis = 1_500) else Modifier,
     )
 }
 
@@ -181,16 +184,14 @@ private fun Art(np: NowPlaying, modifier: Modifier) {
     }
 }
 
-/** Progress and volume bar: rounded and glossy in Classic, square and outlined in Retro. */
+/** Progress and volume bar: square in both styles, glossy in Classic and outlined in Retro. */
 private fun DrawScope.drawBar(style: LcdStyle, fraction: Float, pixel: Float, showFill: Boolean = true) {
-    val r = if (style.retro) CornerRadius.Zero else CornerRadius(size.height / 2)
-    drawRoundRect(style.track, cornerRadius = r)
-    if (showFill) drawRoundRect(style.fill, size = Size(size.width * fraction, size.height), cornerRadius = r)
-    drawRoundRect(
+    drawRect(style.track)
+    if (showFill) drawRect(style.fill, size = Size(size.width * fraction, size.height))
+    drawRect(
         style.divider,
         topLeft = Offset(pixel / 2, pixel / 2),
         size = Size(size.width - pixel, size.height - pixel),
-        cornerRadius = r,
         style = Stroke(pixel),
     )
 }
