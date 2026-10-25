@@ -11,8 +11,9 @@ data class QueuePosition(val number: Int, val total: Int)
  *
  * Every window seen is remembered by absolute position, so skipping forward counts up,
  * going back counts down (even past the start of the window), and the total only
- * grows. A track that doesn't line up with what we've seen is a new album or
- * playlist and starts the count over. Lives in memory, one per session.
+ * grows, unless the app swaps out what's coming up (mixes and radio do). A track that
+ * doesn't line up with what we've seen is a new album or playlist and starts the
+ * count over. Lives in memory, one per app.
  */
 class QueueCounter {
     /** Track keys by absolute 0-based position in the current album or playlist. */
@@ -32,8 +33,19 @@ class QueueCounter {
             current = found ?: index
         }
         val base = current - index
-        queue.forEachIndexed { i, key -> known[base + i] = key }
-        total = maxOf(total, base + queue.size)
+        var replaced = false
+        queue.forEachIndexed { i, key ->
+            val old = known.put(base + i, key)
+            if (old != null && old != key) replaced = true
+        }
+        val end = base + queue.size
+        if (replaced) {
+            // What we remembered past this window was the old Up Next.
+            known.keys.removeAll { it >= end }
+            total = end
+        } else {
+            total = maxOf(total, end)
+        }
         return QueuePosition(current + 1, total)
     }
 
@@ -41,7 +53,8 @@ class QueueCounter {
     private fun locate(queue: List<String>, index: Int): Int? {
         val key = queue[index]
         return known.filterValues { it == key }.keys
-            .filter { aligned(queue, index, it) }
+            // The next track is a plain skip even if the app reshuffled what follows it.
+            .filter { it == current + 1 || aligned(queue, index, it) }
             .minByOrNull { abs(it - current) }
     }
 

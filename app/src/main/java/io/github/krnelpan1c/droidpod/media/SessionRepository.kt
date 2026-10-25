@@ -40,6 +40,11 @@ class SessionRepository(
     private val art = ArtLoader(context, scope) { publish() }
 
     private val tracked = HashMap<MediaSession.Token, TrackedSession>()
+    /**
+     * One per app rather than per session: sessions are released whenever the UI
+     * stops, and the count has to pick up where it left off when we come back.
+     */
+    private val counters = HashMap<String, QueueCounter>()
     /** Session tokens in the system's priority order. */
     private var order: List<MediaSession.Token> = emptyList()
     private var nextId = 0
@@ -188,14 +193,20 @@ class SessionRepository(
             )
         }
         val activeQueueId = s?.activeQueueItemId ?: MediaSessionCompat.QueueItem.UNKNOWN_ID.toLong()
+        val title = text(MediaMetadataCompat.METADATA_KEY_TITLE, MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE)
+            ?: m?.description?.title?.toString()
+            ?: ""
+        // While skipping quickly, YouTube Music keeps the old active id but moves the
+        // queue and metadata along; the title still says which track is playing.
+        val playingIndex = queue.indexOfFirst { it.id == activeQueueId }
+            .takeIf { it >= 0 || title.isBlank() }
+            ?: queue.indexOfFirst { it.title == title }
 
         return NowPlaying(
             key = session.key,
             packageName = session.packageName,
             appLabel = apps.label(session.packageName),
-            title = text(MediaMetadataCompat.METADATA_KEY_TITLE, MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE)
-                ?: m?.description?.title?.toString()
-                ?: "",
+            title = title,
             artist = text(
                 MediaMetadataCompat.METADATA_KEY_ARTIST,
                 MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST,
@@ -215,14 +226,14 @@ class SessionRepository(
             repeat = repeat,
             queue = queue,
             activeQueueId = activeQueueId,
-            queuePosition = session.counter.update(queue.map { it.trackKey }, queue.indexOfFirst { it.id == activeQueueId }),
+            queuePosition = session.counter.update(queue.map { it.trackKey }, playingIndex),
         )
     }
 
     private inner class TrackedSession(val key: String, val controller: MediaControllerCompat) {
         val packageName: String = controller.packageName
         var lastPlayingAt = 0L
-        val counter = QueueCounter()
+        val counter = counters.getOrPut(packageName) { QueueCounter() }
         val isPlaying: Boolean get() = controller.playbackState.isActive()
         private var wasPlaying = isPlaying
 

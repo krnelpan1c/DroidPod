@@ -89,6 +89,33 @@ class QueueCounterTest {
         assertEquals(QueuePosition(1, 25), counter.at(1, tracks = other))
     }
 
+    private val mix = (1..40).map { "mix$it" }
+
+    @Test
+    fun skipWhileTheAppReplacesUpNext_countsUp() {
+        val counter = QueueCounter()
+        counter.at(1)
+        assertEquals(QueuePosition(2, 26), counter.update(listOf("t2") + mix.take(24), 0))
+    }
+
+    @Test
+    fun fastSkipsThenUpNextRefilled_keepsTheCount() {
+        // As seen from YouTube Music: the window shrinks as tracks are skipped, then
+        // refills with different upcoming tracks once playback settles.
+        val counter = QueueCounter()
+        counter.at(1)
+        (2..7).forEach { counter.update(window(it, size = 26 - it), 0) }
+        assertEquals(QueuePosition(7, 31), counter.update(listOf("t7") + mix.take(24), 0))
+        assertEquals(QueuePosition(8, 32), counter.update(listOf("mix1") + mix.drop(1).take(24), 0))
+    }
+
+    @Test
+    fun replacedUpNext_forgetsTheOldOne() {
+        val counter = QueueCounter()
+        counter.at(1)
+        assertEquals(QueuePosition(2, 4), counter.update(listOf("t2", "mix1", "mix2"), 0))
+    }
+
     @Test
     fun unknownActiveTrack_isHidden() {
         assertNull(QueueCounter().update(playlist.take(5), -1))

@@ -274,6 +274,7 @@ class PodController(
         Screen.AddPlayer -> "Add Player"
         Screen.Actions -> state.current?.appLabel ?: "Actions"
         Screen.Settings -> "Settings"
+        Screen.CaseColor -> "Case Color"
         Screen.About -> "About"
         Screen.Diagnostics -> "Diagnostics"
     }
@@ -369,8 +370,8 @@ class PodController(
                 MenuItem("System Style", value = settings.style.label) {
                     settingsRepo.update { it.copy(style = it.style.next()) }
                 },
-                MenuItem("Case Color", value = settings.theme.label) {
-                    settingsRepo.update { it.copy(theme = it.theme.next()) }
+                MenuItem("Case Color", value = settings.theme.label, hasChildren = true) {
+                    push(Screen.CaseColor, settings.theme.ordinal)
                 },
                 toggle("Click Sound", settings.clickSound) { copy(clickSound = !clickSound) },
                 MenuItem("Haptics", value = settings.haptics.label) {
@@ -386,6 +387,11 @@ class PodController(
                 MenuItem("Diagnostics", hasChildren = true) { push(Screen.Diagnostics) },
                 MenuItem("About", hasChildren = true) { push(Screen.About) },
             )
+            Screen.CaseColor -> PodThemeId.entries.map { theme ->
+                MenuItem(theme.label, marked = theme == settings.theme) {
+                    settingsRepo.update { it.copy(theme = theme) }
+                }
+            }
             Screen.Help, Screen.About, Screen.Diagnostics, Screen.NowPlaying -> emptyList()
         }
     }
@@ -447,6 +453,5 @@ class PodController(
         fun HapticStrength.next() = HapticStrength.entries[(ordinal + 1) % HapticStrength.entries.size]
         fun WheelSensitivity.next() = WheelSensitivity.entries[(ordinal + 1) % WheelSensitivity.entries.size]
         fun SystemStyle.next() = SystemStyle.entries[(ordinal + 1) % SystemStyle.entries.size]
-        fun PodThemeId.next() = PodThemeId.entries[(ordinal + 1) % PodThemeId.entries.size]
     }
 }

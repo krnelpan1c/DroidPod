@@ -39,6 +39,10 @@ enum class PodThemeId(val label: String) {
     Black("Black"),
     Red("Red"),
     Silver("Silver"),
+    Gold("Gold"),
+    Pink("Pink"),
+    Blue("Blue"),
+    Green("Green"),
 }
 
 data class Settings(

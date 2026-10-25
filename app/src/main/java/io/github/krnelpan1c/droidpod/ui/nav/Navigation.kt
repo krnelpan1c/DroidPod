@@ -18,6 +18,7 @@ sealed interface Screen {
     data object AddPlayer : Screen
     data object Actions : Screen
     data object Settings : Screen
+    data object CaseColor : Screen
     data object About : Screen
     data object Diagnostics : Screen
 
