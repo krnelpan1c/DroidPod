@@ -1,4 +1,3 @@
-# DroidPod
 ![Multiple phones displaying the click wheel Now Playing interface in various colorways.](banner.webp)
 A click wheel for whatever's playing on your Android phone.
 
