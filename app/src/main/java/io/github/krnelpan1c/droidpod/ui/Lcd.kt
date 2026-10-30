@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -151,8 +152,8 @@ fun Lcd(
             Column(
                 Modifier
                     .fillMaxSize()
-                    .background(style.screen, RoundedCornerShape(6.dp))
-                    .clipToBounds(),
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(style.screen),
             ) {
                 StatusBar(title, playGlyph)
                 Box(Modifier.fillMaxWidth().weight(1f).clipToBounds()) { content() }

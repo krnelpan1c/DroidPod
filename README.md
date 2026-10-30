@@ -1,5 +1,5 @@
 # DroidPod
-
+![Multiple phones displaying the click wheel Now Playing interface in various colorways.](banner.webp)
 A click wheel for whatever's playing on your Android phone.
 
 DroidPod gives you a classic MP3-player screen and a touch click wheel that control the music already playing in **Spotify**, **YouTube Music**, or any other app that shows media controls on your lock screen. It has no account, no login, no API keys and no internet access. It only uses Android's built-in media controls.
